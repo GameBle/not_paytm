@@ -41,7 +41,7 @@ export const Signup = () => {
                 password,
               });
               localStorage.setItem("token", response.data.token);
-              navigate("/dashboard", { state: { firstName: response.firstName } });
+              navigate("/dashboard?name=" + firstName);
             } catch (error) {
               console.error("Signup failed:", error);
             }

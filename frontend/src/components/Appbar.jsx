@@ -8,11 +8,13 @@ export const Appbar = ({ firstName }) => {
                 Hello
             </div>
             <div className="rounded-full h-12 w-12 bg-slate-200 flex justify-center mt-1 mr-2">
-                {
+                {firstName ? (
                     <div className="flex flex-col justify-center h-full text-xl">
-                        U
+                        {firstName.charAt(0).toUpperCase()}
                     </div>
-                }
+                ) : (
+                    <p>Loading...</p>
+                )}
             </div>
         </div>
     </div>

@@ -3,12 +3,12 @@ import { Balance } from "../components/Balance"
 import { Users } from "../components/Users"
 import { useState, useEffect } from "react"
 import axios from "axios"
-import { useLocation } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 
 export const Dashboard = () => {
     const [balance, setBalance] = useState(null);
-    const {state} = useLocation();
-    console.log(state);
+    const [searchParams] = useSearchParams();
+    const firstName = searchParams.get("name")
     useEffect(() => {
         const fetchBalance = async () => {
             const token = localStorage.getItem("token");
@@ -26,7 +26,7 @@ export const Dashboard = () => {
     }, []);
     return (
         <div>
-          <Appbar />
+          <Appbar firstName={firstName}/>
           <div className="m-8">
             {balance !== null ? (
               <>
