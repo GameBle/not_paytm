@@ -1,10 +1,10 @@
 # PayTM Clone — Production-Hardened Full-Stack Wallet App
 
-> **Live Demo:** _Deploy and add your URL here (Vercel + Render + MongoDB Atlas)_
+> **Live Demo:** [https://not-paytm.vercel.app](https://not-paytm.vercel.app)
 
 A peer-to-peer money transfer application built with **React**, **TypeScript**, **Node.js**, **Express**, and **MongoDB**. This project takes the common tutorial PayTM clone and hardens it for production: bcrypt password hashing, JWT auth with expiry, transactional transfers, layered backend architecture, integration tests, CI/CD, and Docker support.
 
-[![CI](https://github.com/YOUR_USERNAME/not_paytm/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/not_paytm/actions/workflows/ci.yml)
+[![CI](https://github.com/GameBle/not_paytm/actions/workflows/ci.yml/badge.svg)](https://github.com/GameBle/not_paytm/actions/workflows/ci.yml)
 
 ## Why this project
 
