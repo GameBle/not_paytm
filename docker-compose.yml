@@ -1,0 +1,34 @@
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_URL: mongodb+srv://razaalisaquib69_db_user:qG8Z5ofQieLvjUtt@cluster0.12aymmo.mongodb.net/?appName=Cluster0
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-string}
+      PORT: 3000
+      NODE_ENV: production
+      FRONTEND_URL: http://localhost:5173
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    environment:
+      VITE_API_URL: http://localhost:3000/api/v1
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
