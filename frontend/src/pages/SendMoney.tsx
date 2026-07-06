@@ -51,7 +51,7 @@ export function SendMoney() {
   };
 
   return (
-    <AppShell header={<Appbar firstName={null} />}>
+    <AppShell header={<Appbar />}>
       <div className="mx-auto w-full max-w-md animate-fade-in">
         <button
           type="button"

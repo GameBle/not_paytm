@@ -1,16 +1,20 @@
 import { LogOut, Wallet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../api/client";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 import { ThemeToggle } from "./ThemeToggle";
 import { Avatar } from "./ui/Avatar";
 import { IconButton } from "./ui/IconButton";
+import { Skeleton } from "./ui/Skeleton";
 
 interface AppbarProps {
-  firstName: string | null;
+  firstName?: string | null;
 }
 
-export function Appbar({ firstName }: AppbarProps) {
+export function Appbar({ firstName: firstNameProp }: AppbarProps) {
   const navigate = useNavigate();
+  const { firstName: fetchedFirstName, loading } = useCurrentUser();
+  const firstName = firstNameProp ?? fetchedFirstName;
 
   const handleLogout = () => {
     logout();
@@ -31,10 +35,19 @@ export function Appbar({ firstName }: AppbarProps) {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2">
-          <span className="hidden text-sm text-muted-foreground sm:inline">
-            Hello, <span className="font-medium text-foreground">{firstName ?? "User"}</span>
-          </span>
-          <Avatar name={firstName ?? "User"} size="sm" />
+          {loading && !firstName ? (
+            <Skeleton className="hidden h-4 w-24 sm:block" />
+          ) : (
+            <span className="hidden text-sm text-muted-foreground sm:inline">
+              Hello,{" "}
+              <span className="font-medium text-foreground">{firstName ?? "User"}</span>
+            </span>
+          )}
+          {loading && !firstName ? (
+            <Skeleton className="h-9 w-9 rounded-full" />
+          ) : (
+            <Avatar name={firstName ?? "User"} size="sm" />
+          )}
           <ThemeToggle />
           <IconButton aria-label="Log out" onClick={handleLogout} variant="ghost" size="sm">
             <LogOut className="h-4 w-4" />

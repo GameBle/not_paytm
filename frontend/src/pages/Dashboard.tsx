@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { apiClient } from "../api/client";
-import { BalanceResponse, UserProfileResponse } from "../types/api";
+import { BalanceResponse } from "../types/api";
 import { Appbar } from "../components/Appbar";
 import { Balance } from "../components/Balance";
 import { Users } from "../components/Users";
@@ -12,7 +12,6 @@ import { Skeleton } from "../components/ui/Skeleton";
 
 export function Dashboard() {
   const [balance, setBalance] = useState<number | null>(null);
-  const [firstName, setFirstName] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -20,11 +19,7 @@ export function Dashboard() {
     setLoading(true);
     setError("");
     try {
-      const [profileResponse, balanceResponse] = await Promise.all([
-        apiClient.get<UserProfileResponse>("/user/me"),
-        apiClient.get<BalanceResponse>("/account/balance"),
-      ]);
-      setFirstName(profileResponse.data.firstName);
+      const balanceResponse = await apiClient.get<BalanceResponse>("/account/balance");
       setBalance(balanceResponse.data.balance);
     } catch {
       setError("Failed to load dashboard. Please try again.");
@@ -38,7 +33,7 @@ export function Dashboard() {
   }, [fetchDashboardData]);
 
   return (
-    <AppShell header={<Appbar firstName={firstName} />}>
+    <AppShell header={<Appbar />}>
       <div className="space-y-8 animate-fade-in">
         {error ? (
           <Card className="flex flex-col items-center gap-4 py-10 text-center">
