@@ -11,7 +11,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      MONGO_URL: mongodb+srv://razaalisaquib69_db_user:qG8Z5ofQieLvjUtt@cluster0.12aymmo.mongodb.net/?appName=Cluster0
+      MONGO_URL: mongodb://mongo:27017/not_paytm
       JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-string}
       PORT: 3000
       NODE_ENV: production
