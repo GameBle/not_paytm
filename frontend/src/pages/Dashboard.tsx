@@ -1,27 +1,29 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { apiClient } from "../api/client";
-import { BalanceResponse } from "../types/api";
+import { BalanceResponse, UserProfileResponse } from "../types/api";
 import { Appbar } from "../components/Appbar";
 import { Balance } from "../components/Balance";
 import { Users } from "../components/Users";
 
 export function Dashboard() {
   const [balance, setBalance] = useState<number | null>(null);
+  const [firstName, setFirstName] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [searchParams] = useSearchParams();
-  const firstName = searchParams.get("name");
 
   useEffect(() => {
-    const fetchBalance = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const response = await apiClient.get<BalanceResponse>("/account/balance");
-        setBalance(response.data.balance);
+        const [profileResponse, balanceResponse] = await Promise.all([
+          apiClient.get<UserProfileResponse>("/user/me"),
+          apiClient.get<BalanceResponse>("/account/balance"),
+        ]);
+        setFirstName(profileResponse.data.firstName);
+        setBalance(balanceResponse.data.balance);
       } catch {
-        setError("Failed to load balance.");
+        setError("Failed to load dashboard.");
       }
     };
-    fetchBalance();
+    fetchDashboardData();
   }, []);
 
   return (

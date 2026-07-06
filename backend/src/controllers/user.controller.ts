@@ -8,6 +8,7 @@ import {
   updateUserSchema,
 } from "../schemas/user.schema";
 import {
+  getCurrentUser,
   searchUsers,
   signinUser,
   signupUser,
@@ -57,6 +58,15 @@ export async function bulkUsers(req: AuthRequest, res: Response): Promise<void> 
 
   const users = await searchUsers(parsed.data.filter);
   res.json({ user: users });
+}
+
+export async function getMe(req: AuthRequest, res: Response): Promise<void> {
+  if (!req.userId) {
+    throw new ApiError(403, "Unauthorized");
+  }
+
+  const user = await getCurrentUser(req.userId);
+  res.json(user);
 }
 
 export function handleControllerError(

@@ -24,7 +24,7 @@ export function Signin() {
         password,
       });
       localStorage.setItem("token", response.data.token);
-      navigate(`/dashboard?name=${encodeURIComponent(response.data.firstName)}`);
+      navigate("/dashboard");
     } catch {
       setError("Invalid email or password.");
     } finally {

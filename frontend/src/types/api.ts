@@ -1,3 +1,9 @@
+export interface UserProfileResponse {
+  username: string;
+  firstName: string;
+  lastName: string;
+}
+
 export interface UserSummary {
   _id: string;
   username: string;

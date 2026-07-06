@@ -59,6 +59,19 @@ export async function signinUser(input: SigninInput) {
   };
 }
 
+export async function getCurrentUser(userId: string) {
+  const user = await User.findById(userId).select("username firstName lastName");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return {
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
+  };
+}
+
 export async function updateUser(userId: string, input: UpdateUserInput) {
   const update: Partial<UpdateUserInput> = { ...input };
 

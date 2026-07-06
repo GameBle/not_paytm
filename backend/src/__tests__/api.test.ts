@@ -81,6 +81,24 @@ describe("Auth API", () => {
 
     expect(res.status).toBe(411);
   });
+
+  it("returns current user profile for authenticated request", async () => {
+    const signupRes = await request(app).post("/api/v1/user/signup").send({
+      username: "me@example.com",
+      firstName: "Maya",
+      lastName: "Patel",
+      password: "password123",
+    });
+
+    const res = await request(app)
+      .get("/api/v1/user/me")
+      .set("Authorization", `Bearer ${signupRes.body.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.firstName).toBe("Maya");
+    expect(res.body.lastName).toBe("Patel");
+    expect(res.body.username).toBe("me@example.com");
+  });
 });
 
 describe("Account API", () => {

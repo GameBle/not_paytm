@@ -28,7 +28,7 @@ export function Signup() {
         password,
       });
       localStorage.setItem("token", response.data.token);
-      navigate(`/dashboard?name=${encodeURIComponent(response.data.firstName)}`);
+      navigate("/dashboard");
     } catch {
       setError("Signup failed. Check your inputs or try a different email.");
     } finally {
