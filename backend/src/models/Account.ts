@@ -12,7 +12,7 @@ const accountSchema = new Schema<IAccount>(
       ref: "User",
       required: true,
       unique: true,
-    },
+    } as mongoose.SchemaDefinitionProperty<Types.ObjectId>,
     balance: {
       type: Number,
       required: true,
