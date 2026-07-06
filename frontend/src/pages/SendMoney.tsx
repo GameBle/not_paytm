@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, IndianRupee } from "lucide-react";
+import { toast } from "sonner";
 import { apiClient } from "../api/client";
 import { TransferResponse } from "../types/api";
+import { Appbar } from "../components/Appbar";
+import { Button } from "../components/Button";
+import { AppShell } from "../components/layout/AppShell";
+import { Avatar } from "../components/ui/Avatar";
+import { Card } from "../components/ui/Card";
+import { Input } from "../components/ui/Input";
 
 export function SendMoney() {
   const [searchParams] = useSearchParams();
@@ -10,17 +18,18 @@ export function SendMoney() {
   const name = searchParams.get("name") ?? "User";
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleTransfer = async () => {
+  const handleTransfer = async (event: React.FormEvent) => {
+    event.preventDefault();
+
     if (!id) {
       setError("Invalid recipient.");
+      toast.error("Invalid recipient.");
       return;
     }
 
     setError("");
-    setSuccess("");
     setLoading(true);
 
     try {
@@ -28,62 +37,66 @@ export function SendMoney() {
         to: id,
         amount: Number(amount),
       });
-      setSuccess(response.data.message);
+      toast.success(response.data.message);
       setTimeout(() => navigate("/dashboard"), 1500);
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ?? "Transfer failed.";
       setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center h-screen bg-gray-100">
-      <div className="h-full flex flex-col justify-center">
-        <div className="border h-min text-card-foreground max-w-md p-4 space-y-8 w-96 bg-white shadow-lg rounded-lg">
-          <div className="flex flex-col space-y-1.5 p-6">
-            <h2 className="text-3xl font-bold text-center">Send Money</h2>
+    <AppShell header={<Appbar firstName={null} />}>
+      <div className="mx-auto w-full max-w-md animate-fade-in">
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard")}
+          className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to dashboard
+        </button>
+
+        <Card>
+          <div className="mb-6 space-y-2 text-center">
+            <h1 className="text-2xl font-bold tracking-tight">Send money</h1>
+            <p className="text-sm text-muted-foreground">Transfer funds instantly</p>
           </div>
-          <div className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">
-                <span className="text-2xl text-white">{name[0]?.toUpperCase()}</span>
-              </div>
-              <h3 className="text-2xl font-semibold">{name}</h3>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label
-                  className="text-sm font-medium leading-none"
-                  htmlFor="amount"
-                >
-                  Amount (in Rs)
-                </label>
-                <input
-                  onChange={(e) => setAmount(e.target.value)}
-                  type="number"
-                  min="1"
-                  className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
-                  id="amount"
-                  placeholder="Enter amount"
-                />
-              </div>
-              {error && <p className="text-red-600 text-sm">{error}</p>}
-              {success && <p className="text-green-600 text-sm">{success}</p>}
-              <button
-                onClick={handleTransfer}
-                disabled={loading || !amount}
-                className="justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full bg-green-500 text-white disabled:opacity-50"
-              >
-                {loading ? "Processing..." : "Initiate Transfer"}
-              </button>
+
+          <div className="mb-6 flex items-center gap-4 rounded-lg border border-border bg-muted/40 p-4">
+            <Avatar name={name} size="lg" />
+            <div>
+              <p className="text-sm text-muted-foreground">Sending to</p>
+              <p className="text-lg font-semibold text-foreground">{name}</p>
             </div>
           </div>
-        </div>
+
+          <form onSubmit={handleTransfer} className="space-y-4">
+            <Input
+              label="Amount (INR)"
+              type="number"
+              min="1"
+              step="0.01"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              leftIcon={<IndianRupee className="h-4 w-4" aria-hidden="true" />}
+              error={error || undefined}
+            />
+            <Button
+              type="submit"
+              label="Initiate transfer"
+              isLoading={loading}
+              disabled={!amount}
+            />
+          </form>
+        </Card>
       </div>
-    </div>
+    </AppShell>
   );
 }

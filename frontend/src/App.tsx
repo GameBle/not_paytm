@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Toaster } from "sonner";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { Signup } from "./pages/Signup";
 import { Signin } from "./pages/Signin";
@@ -8,6 +9,7 @@ import { SendMoney } from "./pages/SendMoney";
 function App() {
   return (
     <BrowserRouter>
+      <Toaster richColors closeButton position="top-right" />
       <Routes>
         <Route path="/signup" element={<Signup />} />
         <Route path="/signin" element={<Signin />} />
