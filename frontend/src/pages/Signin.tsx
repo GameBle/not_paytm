@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { toast } from "sonner";
-import { apiClient } from "../api/client";
+import { apiClient, setAccessToken } from "../api/client";
 import { AuthResponse } from "../types/api";
 import { BottomWarning } from "../components/BottomWarning";
 import { Button } from "../components/Button";
@@ -14,6 +14,7 @@ import { IconButton } from "../components/ui/IconButton";
 export function Signin() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,8 +28,9 @@ export function Signin() {
       const response = await apiClient.post<AuthResponse>("/user/signin", {
         username,
         password,
+        rememberMe,
       });
-      localStorage.setItem("token", response.data.token);
+      setAccessToken(response.data.token);
       toast.success("Welcome back!");
       navigate("/dashboard");
     } catch {
@@ -76,14 +78,24 @@ export function Signin() {
                 size="sm"
                 variant="ghost"
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </IconButton>
             }
           />
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="rounded border-border"
+              />
+              Remember me
+            </label>
+            <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+              Forgot password?
+            </Link>
+          </div>
           <Button type="submit" label="Sign in" isLoading={loading} />
         </form>
 

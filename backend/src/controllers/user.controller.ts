@@ -22,7 +22,7 @@ export async function signup(req: AuthRequest, res: Response): Promise<void> {
     throw new ApiError(411, "Email already taken / Incorrect inputs", parsed.error.flatten());
   }
 
-  const result = await signupUser(parsed.data);
+  const result = await signupUser(parsed.data, res);
   res.json(result);
 }
 
@@ -32,7 +32,7 @@ export async function signin(req: AuthRequest, res: Response): Promise<void> {
     throw new ApiError(411, "Email already taken / Incorrect inputs", parsed.error.flatten());
   }
 
-  const result = await signinUser(parsed.data);
+  const result = await signinUser(parsed.data, res);
   res.json(result);
 }
 

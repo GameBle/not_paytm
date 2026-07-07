@@ -10,6 +10,7 @@ import { AppShell } from "../components/layout/AppShell";
 import { Avatar } from "../components/ui/Avatar";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
+import { Modal } from "../components/ui/Modal";
 
 export function SendMoney() {
   const [searchParams] = useSearchParams();
@@ -19,10 +20,9 @@ export function SendMoney() {
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleTransfer = async (event: React.FormEvent) => {
-    event.preventDefault();
-
+  const handleTransfer = async () => {
     if (!id) {
       setError("Invalid recipient.");
       toast.error("Invalid recipient.");
@@ -38,7 +38,7 @@ export function SendMoney() {
         amount: Number(amount),
       });
       toast.success(response.data.message);
-      setTimeout(() => navigate("/dashboard"), 1500);
+      navigate(`/transactions/${response.data.transactionId}`);
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
@@ -47,6 +47,7 @@ export function SendMoney() {
       toast.error(message);
     } finally {
       setLoading(false);
+      setShowConfirm(false);
     }
   };
 
@@ -76,7 +77,13 @@ export function SendMoney() {
             </div>
           </div>
 
-          <form onSubmit={handleTransfer} className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setShowConfirm(true);
+            }}
+            className="space-y-4"
+          >
             <Input
               label="Amount (INR)"
               type="number"
@@ -90,13 +97,30 @@ export function SendMoney() {
             />
             <Button
               type="submit"
-              label="Initiate transfer"
+              label="Review transfer"
               isLoading={loading}
               disabled={!amount}
             />
           </form>
         </Card>
       </div>
+
+      <Modal open={showConfirm} onClose={() => setShowConfirm(false)} title="Confirm transfer">
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Send <span className="font-semibold text-foreground">₹{amount}</span> to{" "}
+            <span className="font-semibold text-foreground">{name}</span>?
+          </p>
+          <div className="flex gap-2">
+            <Button
+              label="Cancel"
+              variant="secondary"
+              onClick={() => setShowConfirm(false)}
+            />
+            <Button label="Confirm" isLoading={loading} onClick={handleTransfer} />
+          </div>
+        </div>
+      </Modal>
     </AppShell>
   );
 }

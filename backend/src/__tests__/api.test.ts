@@ -2,7 +2,10 @@ import request from "supertest";
 import { createApp } from "../app";
 import { disconnectDb } from "../db";
 import { Account } from "../models/Account";
+import { Notification } from "../models/Notification";
+import { Transaction } from "../models/Transaction";
 import { User } from "../models/User";
+import { generateToken, hashToken } from "../utils/tokens";
 
 const app = createApp();
 
@@ -24,6 +27,7 @@ describe("Auth API", () => {
     expect(res.status).toBe(200);
     expect(res.body.token).toBeDefined();
     expect(res.body.firstName).toBe("Alice");
+    expect(res.body.emailVerified).toBe(false);
 
     const account = await Account.findOne({});
     expect(account).not.toBeNull();
@@ -59,11 +63,13 @@ describe("Auth API", () => {
     const res = await request(app).post("/api/v1/user/signin").send({
       username: "carol@example.com",
       password: "password123",
+      rememberMe: true,
     });
 
     expect(res.status).toBe(200);
     expect(res.body.token).toBeDefined();
     expect(res.body.firstName).toBe("Carol");
+    expect(res.headers["set-cookie"]).toBeDefined();
   });
 
   it("rejects signin with wrong password", async () => {
@@ -98,6 +104,85 @@ describe("Auth API", () => {
     expect(res.body.firstName).toBe("Maya");
     expect(res.body.lastName).toBe("Patel");
     expect(res.body.username).toBe("me@example.com");
+    expect(res.body.role).toBe("user");
+    expect(res.body.emailVerified).toBe(false);
+  });
+
+  it("refreshes access token with refresh cookie", async () => {
+    await request(app).post("/api/v1/user/signup").send({
+      username: "refresh@example.com",
+      firstName: "Refresh",
+      lastName: "User",
+      password: "password123",
+    });
+
+    const agent = request.agent(app);
+    const signinRes = await agent.post("/api/v1/user/signin").send({
+      username: "refresh@example.com",
+      password: "password123",
+    });
+    expect(signinRes.body.token).toBeDefined();
+
+    const refreshRes = await agent.post("/api/v1/auth/refresh");
+    expect(refreshRes.status).toBe(200);
+    expect(refreshRes.body.token).toBeDefined();
+  });
+
+  it("verifies email with valid token", async () => {
+    await request(app).post("/api/v1/user/signup").send({
+      username: "verify@example.com",
+      firstName: "Verify",
+      lastName: "User",
+      password: "password123",
+    });
+
+    const token = generateToken();
+    await User.updateOne(
+      { username: "verify@example.com" },
+      {
+        $set: {
+          verificationToken: hashToken(token),
+          verificationTokenExpiry: new Date(Date.now() + 3600000),
+        },
+      }
+    );
+
+    const res = await request(app).post("/api/v1/auth/verify-email").send({ token });
+    expect(res.status).toBe(200);
+
+    const user = await User.findOne({ username: "verify@example.com" });
+    expect(user!.emailVerified).toBe(true);
+  });
+
+  it("resets password with valid token", async () => {
+    await request(app).post("/api/v1/user/signup").send({
+      username: "reset@example.com",
+      firstName: "Reset",
+      lastName: "User",
+      password: "password123",
+    });
+
+    const token = generateToken();
+    await User.updateOne(
+      { username: "reset@example.com" },
+      {
+        $set: {
+          resetToken: hashToken(token),
+          resetTokenExpiry: new Date(Date.now() + 3600000),
+        },
+      }
+    );
+
+    const res = await request(app)
+      .post("/api/v1/auth/reset-password")
+      .send({ token, password: "newpassword123" });
+    expect(res.status).toBe(200);
+
+    const signinRes = await request(app).post("/api/v1/user/signin").send({
+      username: "reset@example.com",
+      password: "newpassword123",
+    });
+    expect(signinRes.status).toBe(200);
   });
 });
 
@@ -134,7 +219,7 @@ describe("Account API", () => {
     expect(res.body.balance).toBe(500);
   });
 
-  it("transfers funds between users", async () => {
+  it("transfers funds between users and records transaction", async () => {
     const sender = await createUser("sender@example.com", "Sender", 1000);
     const recipient = await createUser("recipient@example.com", "Recipient", 100);
 
@@ -145,12 +230,18 @@ describe("Account API", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe("Transfer successful");
+    expect(res.body.transactionId).toBeDefined();
 
     const senderAccount = await Account.findOne({ userId: sender.userId });
     const recipientAccount = await Account.findOne({ userId: recipient.userId });
+    const tx = await Transaction.findById(res.body.transactionId);
 
     expect(senderAccount!.balance).toBe(750);
     expect(recipientAccount!.balance).toBe(350);
+    expect(tx).not.toBeNull();
+
+    const notification = await Notification.findOne({ userId: recipient.userId });
+    expect(notification).not.toBeNull();
   });
 
   it("rejects transfer with insufficient balance", async () => {
@@ -188,6 +279,124 @@ describe("Account API", () => {
       .send({ to: recipient.userId, amount: -10 });
 
     expect(res.status).toBe(400);
+  });
+});
+
+describe("Transactions API", () => {
+  async function createUserWithTransfer() {
+    const sender = await request(app).post("/api/v1/user/signup").send({
+      username: "txsender@example.com",
+      firstName: "TxSender",
+      lastName: "Test",
+      password: "password123",
+    });
+    const recipient = await request(app).post("/api/v1/user/signup").send({
+      username: "txrecipient@example.com",
+      firstName: "TxRecipient",
+      lastName: "Test",
+      password: "password123",
+    });
+    const recipientUser = await User.findOne({ username: "txrecipient@example.com" });
+    await Account.updateOne({ userId: recipientUser!._id }, { balance: 100 });
+    const senderUser = await User.findOne({ username: "txsender@example.com" });
+    await Account.updateOne({ userId: senderUser!._id }, { balance: 1000 });
+
+    const transferRes = await request(app)
+      .post("/api/v1/account/transfer")
+      .set("Authorization", `Bearer ${sender.body.token}`)
+      .send({ to: recipientUser!._id.toString(), amount: 100 });
+
+    return {
+      senderToken: sender.body.token,
+      transactionId: transferRes.body.transactionId as string,
+    };
+  }
+
+  it("lists user transactions", async () => {
+    const { senderToken } = await createUserWithTransfer();
+
+    const res = await request(app)
+      .get("/api/v1/transactions")
+      .set("Authorization", `Bearer ${senderToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.items.length).toBeGreaterThanOrEqual(1);
+    expect(res.body.items[0].direction).toBe("sent");
+  });
+
+  it("returns transaction receipt for owner", async () => {
+    const { senderToken, transactionId } = await createUserWithTransfer();
+
+    const res = await request(app)
+      .get(`/api/v1/transactions/${transactionId}`)
+      .set("Authorization", `Bearer ${senderToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.amount).toBe(100);
+    expect(res.body.from).toBeDefined();
+    expect(res.body.to).toBeDefined();
+  });
+});
+
+describe("Notifications API", () => {
+  it("lists notifications for user", async () => {
+    const signupRes = await request(app).post("/api/v1/user/signup").send({
+      username: "notif@example.com",
+      firstName: "Notif",
+      lastName: "User",
+      password: "password123",
+    });
+    const user = await User.findOne({ username: "notif@example.com" });
+    await Notification.create({
+      userId: user!._id,
+      type: "test",
+      message: "Hello",
+      read: false,
+    });
+
+    const res = await request(app)
+      .get("/api/v1/notifications")
+      .set("Authorization", `Bearer ${signupRes.body.token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.items.length).toBe(1);
+    expect(res.body.unreadCount).toBe(1);
+  });
+});
+
+describe("Admin API", () => {
+  async function createAdmin() {
+    const signupRes = await request(app).post("/api/v1/user/signup").send({
+      username: "admin@example.com",
+      firstName: "Admin",
+      lastName: "User",
+      password: "password123",
+    });
+    await User.updateOne({ username: "admin@example.com" }, { $set: { role: "admin" } });
+    return signupRes.body.token as string;
+  }
+
+  it("returns stats for admin", async () => {
+    const token = await createAdmin();
+    const res = await request(app)
+      .get("/api/v1/admin/stats")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.totalUsers).toBeGreaterThanOrEqual(1);
+  });
+
+  it("rejects non-admin access", async () => {
+    const signupRes = await request(app).post("/api/v1/user/signup").send({
+      username: "regular@example.com",
+      firstName: "Regular",
+      lastName: "User",
+      password: "password123",
+    });
+
+    const res = await request(app)
+      .get("/api/v1/admin/stats")
+      .set("Authorization", `Bearer ${signupRes.body.token}`);
+    expect(res.status).toBe(403);
   });
 });
 

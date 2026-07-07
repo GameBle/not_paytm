@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { toast } from "sonner";
-import { apiClient } from "../api/client";
+import { apiClient, setAccessToken } from "../api/client";
 import { AuthResponse } from "../types/api";
 import { BottomWarning } from "../components/BottomWarning";
 import { Button } from "../components/Button";
@@ -32,7 +32,7 @@ export function Signup() {
         lastName,
         password,
       });
-      localStorage.setItem("token", response.data.token);
+      setAccessToken(response.data.token);
       toast.success("Account created successfully!");
       navigate("/dashboard");
     } catch {

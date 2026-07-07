@@ -14,6 +14,12 @@ const envSchema = z
     JWT_SECRET: z.string().min(16, "JWT_SECRET must be at least 16 characters"),
     PORT: z.coerce.number().default(3000),
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+    FRONTEND_URL: z.string().url().default("http://localhost:5173"),
+    RESEND_API_KEY: z.string().optional(),
+    EMAIL_FROM: z.string().default("onboarding@resend.dev"),
+    ACCESS_TOKEN_TTL: z.string().default("15m"),
+    REFRESH_TOKEN_TTL: z.string().default("7d"),
+    REFRESH_TOKEN_TTL_REMEMBER: z.string().default("30d"),
   })
   .refine(
     (data) =>

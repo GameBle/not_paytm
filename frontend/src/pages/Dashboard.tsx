@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, Mail, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 import { apiClient } from "../api/client";
 import { BalanceResponse } from "../types/api";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 import { Appbar } from "../components/Appbar";
 import { Balance } from "../components/Balance";
 import { Users } from "../components/Users";
@@ -14,6 +16,7 @@ export function Dashboard() {
   const [balance, setBalance] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const { emailVerified, username } = useCurrentUser();
 
   const fetchDashboardData = useCallback(async () => {
     setLoading(true);
@@ -32,9 +35,34 @@ export function Dashboard() {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
+  const handleResendVerification = async () => {
+    if (!username) return;
+    try {
+      await apiClient.post("/auth/resend-verification", { email: username });
+      toast.success("Verification email sent");
+    } catch {
+      toast.error("Failed to send verification email");
+    }
+  };
+
   return (
     <AppShell header={<Appbar />}>
       <div className="space-y-8 animate-fade-in">
+        {!emailVerified && (
+          <Card className="flex items-center gap-3 border-amber-500/50 bg-amber-500/10">
+            <Mail className="h-5 w-5 shrink-0 text-amber-600" />
+            <div className="flex-1 text-sm">
+              Please verify your email to unlock all features.{" "}
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                className="font-medium text-primary hover:underline"
+              >
+                Resend email
+              </button>
+            </div>
+          </Card>
+        )}
         {error ? (
           <Card className="flex flex-col items-center gap-4 py-10 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
