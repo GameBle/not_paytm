@@ -33,10 +33,10 @@ export function TransactionHistory() {
 
   return (
     <AppShell header={<Appbar />}>
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Transaction history</h1>
-          <div className="flex gap-2">
+      <div className="space-y-4 animate-fade-in sm:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-xl font-bold sm:text-2xl">Transaction history</h1>
+          <div className="flex flex-wrap gap-2">
             {(["all", "sent", "received"] as const).map((t) => (
               <button
                 key={t}
@@ -66,7 +66,7 @@ export function TransactionHistory() {
                 key={tx._id}
                 type="button"
                 onClick={() => navigate(`/transactions/${tx._id}`)}
-                className="flex w-full items-center justify-between rounded-lg border border-border bg-card p-4 text-left hover:bg-muted/30"
+                className="flex w-full flex-col gap-2 rounded-lg border border-border bg-card p-3 text-left hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between sm:p-4"
               >
                 <div>
                   <p className="font-medium">
@@ -78,7 +78,7 @@ export function TransactionHistory() {
                   </p>
                 </div>
                 <span
-                  className={`font-semibold ${
+                  className={`shrink-0 self-end text-base font-semibold sm:self-auto sm:text-lg ${
                     tx.direction === "sent" ? "text-destructive" : "text-green-600"
                   }`}
                 >
@@ -90,7 +90,7 @@ export function TransactionHistory() {
         )}
 
         {data && data.total > data.limit && (
-          <div className="flex justify-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
             <Button
               label="Previous"
               variant="secondary"

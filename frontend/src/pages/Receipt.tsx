@@ -33,7 +33,7 @@ export function Receipt() {
         ) : receipt ? (
           <Card className="print:border-0 print:shadow-none" id="receipt">
             <div className="mb-6 text-center">
-              <h1 className="text-2xl font-bold">Payment Receipt</h1>
+              <h1 className="text-xl font-bold sm:text-2xl">Payment Receipt</h1>
               <p className="text-sm text-muted-foreground">
                 Ref: {receipt._id}
               </p>
@@ -64,7 +64,7 @@ export function Receipt() {
                 <span>{new Date(receipt.createdAt).toLocaleString()}</span>
               </div>
             </div>
-            <div className="mt-6 flex gap-2 print:hidden">
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row print:hidden">
               <Button
                 label="Print"
                 leftIcon={<Printer className="h-4 w-4" />}

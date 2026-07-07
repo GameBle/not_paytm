@@ -31,7 +31,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       aria-labelledby="modal-title"
     >
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md animate-fade-in rounded-lg border border-border bg-card p-6 shadow-lg">
+      <div className="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-md animate-fade-in overflow-y-auto rounded-lg border border-border bg-card p-4 shadow-lg sm:p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 id="modal-title" className="text-lg font-semibold">
             {title}

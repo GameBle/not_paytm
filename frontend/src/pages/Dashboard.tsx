@@ -49,9 +49,9 @@ export function Dashboard() {
     <AppShell header={<Appbar />}>
       <div className="space-y-8 animate-fade-in">
         {!emailVerified && (
-          <Card className="flex items-center gap-3 border-amber-500/50 bg-amber-500/10">
-            <Mail className="h-5 w-5 shrink-0 text-amber-600" />
-            <div className="flex-1 text-sm">
+          <Card className="flex flex-col gap-3 border-amber-500/50 bg-amber-500/10 sm:flex-row sm:items-center">
+            <Mail className="mx-auto h-5 w-5 shrink-0 text-amber-600 sm:mx-0" />
+            <div className="flex-1 text-center text-sm sm:text-left">
               Please verify your email to unlock all features.{" "}
               <button
                 type="button"

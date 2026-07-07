@@ -71,8 +71,8 @@ export function Profile() {
 
   return (
     <AppShell header={<Appbar />}>
-      <div className="mx-auto max-w-lg space-y-6 animate-fade-in">
-        <h1 className="text-2xl font-bold">Profile</h1>
+      <div className="mx-auto max-w-lg space-y-4 animate-fade-in sm:space-y-6">
+        <h1 className="text-xl font-bold sm:text-2xl">Profile</h1>
         {loading ? (
           <Skeleton className="h-64 w-full" />
         ) : (

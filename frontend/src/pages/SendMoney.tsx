@@ -65,7 +65,7 @@ export function SendMoney() {
 
         <Card>
           <div className="mb-6 space-y-2 text-center">
-            <h1 className="text-2xl font-bold tracking-tight">Send money</h1>
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Send money</h1>
             <p className="text-sm text-muted-foreground">Transfer funds instantly</p>
           </div>
 
@@ -111,7 +111,7 @@ export function SendMoney() {
             Send <span className="font-semibold text-foreground">₹{amount}</span> to{" "}
             <span className="font-semibold text-foreground">{name}</span>?
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Button
               label="Cancel"
               variant="secondary"

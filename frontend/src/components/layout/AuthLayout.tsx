@@ -17,7 +17,7 @@ export function AuthLayout({ children, className }: AuthLayoutProps) {
         className
       )}
     >
-      <div className="w-full max-w-sm animate-fade-in">{children}</div>
+      <div className="w-full max-w-sm sm:max-w-md animate-fade-in">{children}</div>
     </div>
   );
 }

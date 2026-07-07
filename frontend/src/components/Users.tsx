@@ -47,8 +47,8 @@ export function Users() {
 
   return (
     <section aria-labelledby="users-heading" className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <h2 id="users-heading" className="text-lg font-semibold tracking-tight">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 id="users-heading" className="text-base font-semibold tracking-tight sm:text-lg">
           Send to users
         </h2>
         {!loading && (
@@ -130,7 +130,7 @@ function UserRow({ user }: { user: UserSummary }) {
   const navigate = useNavigate();
 
   return (
-    <li className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-muted/50">
+    <li className="flex flex-col gap-3 p-3 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4">
       <div className="flex min-w-0 items-center gap-3">
         <Avatar name={user.firstName} size="md" />
         <div className="min-w-0">
@@ -144,6 +144,7 @@ function UserRow({ user }: { user: UserSummary }) {
         variant="primary"
         size="sm"
         fullWidth={false}
+        className="w-full sm:w-auto"
         label="Send"
         onClick={() => {
           navigate(`/send?id=${user._id}&name=${encodeURIComponent(user.firstName)}`);
