@@ -32,15 +32,17 @@ function getRefreshExpiry(rememberMe: boolean): Date {
   return new Date(Date.now() + value * multipliers[unit]);
 }
 
-function cookieOptions(expires: Date) {
+function cookieOptions(rememberMe: boolean, expires: Date) {
   const isProd = env.NODE_ENV === "production";
-  return {
+  const base = {
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? ("none" as const) : ("lax" as const),
-    expires,
     path: "/api/v1/auth",
   };
+  // Session cookie when not remembering — cleared when browser closes
+  if (!rememberMe) return base;
+  return { ...base, expires };
 }
 
 export async function issueAuthTokens(
@@ -56,9 +58,10 @@ export async function issueAuthTokens(
     userId,
     tokenHash: hashToken(refreshToken),
     expiresAt,
+    rememberMe,
   });
 
-  res.cookie(REFRESH_COOKIE, refreshToken, cookieOptions(expiresAt));
+  res.cookie(REFRESH_COOKIE, refreshToken, cookieOptions(rememberMe, expiresAt));
   return { accessToken };
 }
 
@@ -79,7 +82,8 @@ export async function refreshAccessToken(refreshToken: string, res: Response) {
   }
 
   await RefreshToken.deleteOne({ _id: stored._id });
-  const { accessToken } = await issueAuthTokens(stored.userId, false, res);
+  const rememberMe = stored.rememberMe ?? false;
+  const { accessToken } = await issueAuthTokens(stored.userId, rememberMe, res);
   return { accessToken };
 }
 

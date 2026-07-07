@@ -32,7 +32,7 @@ export function Signup() {
         lastName,
         password,
       });
-      setAccessToken(response.data.token);
+      setAccessToken(response.data.token, false);
       toast.success("Account created successfully!");
       navigate("/dashboard");
     } catch {

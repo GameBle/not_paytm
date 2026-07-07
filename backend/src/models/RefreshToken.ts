@@ -4,6 +4,7 @@ export interface IRefreshToken extends Document {
   userId: Types.ObjectId;
   tokenHash: string;
   expiresAt: Date;
+  rememberMe: boolean;
 }
 
 const refreshTokenSchema = new Schema<IRefreshToken>(
@@ -16,6 +17,7 @@ const refreshTokenSchema = new Schema<IRefreshToken>(
     } as mongoose.SchemaDefinitionProperty<Types.ObjectId>,
     tokenHash: { type: String, required: true, unique: true },
     expiresAt: { type: Date, required: true, index: true },
+    rememberMe: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

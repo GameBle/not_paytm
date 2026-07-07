@@ -9,6 +9,11 @@ import { errorHandler } from "./middleware/middleware";
 export function createApp(): Application {
   const app = express();
 
+  // Render/Vercel sit behind a reverse proxy that sets X-Forwarded-For
+  if (env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+  }
+
   app.use(helmet());
   app.use(
     cors({

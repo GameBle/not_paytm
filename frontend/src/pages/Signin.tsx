@@ -30,7 +30,7 @@ export function Signin() {
         password,
         rememberMe,
       });
-      setAccessToken(response.data.token);
+      setAccessToken(response.data.token, rememberMe);
       toast.success("Welcome back!");
       navigate("/dashboard");
     } catch {
