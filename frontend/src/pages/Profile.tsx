@@ -1,5 +1,6 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Lock, User } from "lucide-react";
+import { Lock, Shield, User } from "lucide-react";
 import { toast } from "sonner";
 import { apiClient } from "../api/client";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -11,7 +12,7 @@ import { Button } from "../components/Button";
 import { Skeleton } from "../components/ui/Skeleton";
 
 export function Profile() {
-  const { user, loading, emailVerified, username } = useCurrentUser();
+  const { user, loading, emailVerified, username, role } = useCurrentUser();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -90,6 +91,35 @@ export function Profile() {
                 </p>
               </Card>
             )}
+            <Card>
+              <h2 className="mb-4 font-semibold">Account</h2>
+              <p className="text-sm text-muted-foreground">
+                Role:{" "}
+                <span className="font-medium capitalize text-foreground">{role}</span>
+              </p>
+              {role === "admin" && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Link
+                    to="/admin"
+                    className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
+                  >
+                    <Shield className="h-4 w-4" /> Admin dashboard
+                  </Link>
+                  <Link
+                    to="/admin/users"
+                    className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm hover:bg-muted"
+                  >
+                    Manage users
+                  </Link>
+                  <Link
+                    to="/admin/transactions"
+                    className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm hover:bg-muted"
+                  >
+                    All transactions
+                  </Link>
+                </div>
+              )}
+            </Card>
             <Card>
               <h2 className="mb-4 font-semibold">Personal info</h2>
               <p className="mb-4 text-sm text-muted-foreground">{username}</p>

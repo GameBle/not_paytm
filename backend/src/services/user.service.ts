@@ -72,7 +72,7 @@ export async function getCurrentUser(userId: string) {
     username: user.username,
     firstName: user.firstName,
     lastName: user.lastName,
-    role: user.role,
+    role: user.role ?? "user",
     emailVerified: user.emailVerified,
   };
 }
